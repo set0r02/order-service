@@ -20,7 +20,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: status
-                  type: boolean
+                  type: varchar(128)
                   constraints:
                     nullable: false
               - column:
@@ -114,7 +114,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: quantity
-                  type: bigint
+                  type: int
                   constraints:
                     nullable: false
         - createIndex:
