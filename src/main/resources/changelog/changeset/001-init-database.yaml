@@ -117,6 +117,14 @@ databaseChangeLog:
                   type: int
                   constraints:
                     nullable: false
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: updated_at
+                  type: timestamp
         - createIndex:
             tableName: order_items
             indexName: idx_order_items_order_id

@@ -1,10 +1,7 @@
 package com.innowise.orderservice.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,7 +12,8 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class Order {
+@EqualsAndHashCode(callSuper = true)
+public class Order extends AuditableEntity{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
