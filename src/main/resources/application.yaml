@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: orderservice
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    change-log-path: classpath:changelog/db.changelog-master.yaml
+    enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show_sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+  logging:
+    level: INFO
