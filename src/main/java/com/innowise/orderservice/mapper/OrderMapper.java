@@ -5,11 +5,9 @@ import com.innowise.orderservice.dto.OrderOutputDto;
 import com.innowise.orderservice.model.Order;
 import org.mapstruct.Mapper;
 
-@Mapper
+@Mapper(componentModel = "spring", uses = OrderItemMapper.class)
 public interface OrderMapper {
 
     OrderOutputDto toDto(Order order);
-
-    Order toEntity(OrderInputDto orderInputDto);
 
 }

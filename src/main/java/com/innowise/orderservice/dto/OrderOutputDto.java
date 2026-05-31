@@ -1,6 +1,7 @@
 package com.innowise.orderservice.dto;
 
 import com.innowise.orderservice.model.OrderItem;
+import com.innowise.orderservice.model.Status;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
@@ -11,7 +12,7 @@ public record OrderOutputDto(
 
         Long userId,
 
-        String status,
+        Status status,
 
         double totalPrice,
 

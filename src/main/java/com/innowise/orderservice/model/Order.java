@@ -24,7 +24,8 @@ public class Order extends AuditableEntity{
     private Long userId;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Status status;
 
     @Column(name = "total_price", nullable = false)
     private double totalPrice;
