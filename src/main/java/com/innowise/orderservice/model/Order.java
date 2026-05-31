@@ -24,7 +24,7 @@ public class Order extends AuditableEntity{
     private Long userId;
 
     @Column(name = "status", nullable = false)
-    private boolean status;
+    private String status;
 
     @Column(name = "total_price", nullable = false)
     private double totalPrice;
@@ -33,7 +33,7 @@ public class Order extends AuditableEntity{
     private boolean deleted;
 
     @Builder.Default
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
 }
