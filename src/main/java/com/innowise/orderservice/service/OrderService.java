@@ -1,7 +1,7 @@
 package com.innowise.orderservice.service;
 
-import com.innowise.orderservice.dto.OrderInputDto;
-import com.innowise.orderservice.dto.OrderOutputDto;
+import com.innowise.orderservice.dto.input.OrderInputDto;
+import com.innowise.orderservice.dto.output.OrderOutputDto;
 
 public interface OrderService {
 

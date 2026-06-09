@@ -1,6 +1,5 @@
-package com.innowise.orderservice.dto;
+package com.innowise.orderservice.dto.output;
 
-import com.innowise.orderservice.model.OrderItem;
 import com.innowise.orderservice.model.Status;
 
 import java.io.Serializable;
@@ -18,7 +17,7 @@ public record OrderOutputDto(
 
         boolean deleted,
 
-        List<OrderItem> orderItems,
+        List<OrderItemOutputDto> items,
 
         LocalDateTime createdAt,
 

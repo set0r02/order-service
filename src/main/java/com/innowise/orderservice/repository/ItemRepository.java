@@ -1,6 +1,5 @@
 package com.innowise.orderservice.repository;
 
-import com.innowise.orderservice.dto.OrderOutputDto;
 import com.innowise.orderservice.model.Item;
 import org.springframework.data.jpa.repository.JpaRepository;
 

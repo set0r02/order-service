@@ -1,4 +1,4 @@
-package com.innowise.orderservice.dto;
+package com.innowise.orderservice.dto.input;
 
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;

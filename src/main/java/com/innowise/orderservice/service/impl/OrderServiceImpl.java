@@ -1,8 +1,8 @@
 package com.innowise.orderservice.service.impl;
 
-import com.innowise.orderservice.dto.OrderInputDto;
-import com.innowise.orderservice.dto.OrderItemInputDto;
-import com.innowise.orderservice.dto.OrderOutputDto;
+import com.innowise.orderservice.dto.input.OrderInputDto;
+import com.innowise.orderservice.dto.input.OrderItemInputDto;
+import com.innowise.orderservice.dto.output.OrderOutputDto;
 import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.Item;
