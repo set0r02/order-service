@@ -8,7 +8,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "items")
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
