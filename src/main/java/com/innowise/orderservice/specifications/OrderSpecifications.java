@@ -12,12 +12,12 @@ public class OrderSpecifications {
         return (root, query, criteriaBuilder) ->
             statusList == null || statusList.isEmpty() ? null : root.get("status").in(statusList);
     }
-    public static Specification<Order> createdBetween(LocalDateTime start, LocalDateTime end){
+    public static Specification<Order> createdBetween(LocalDateTime from, LocalDateTime to){
         return ((root, query, criteriaBuilder) -> {
-            if(start == null && end == null) return null;
-            if(start == null) return criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"),end);
-            if(end == null) return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"),start);
-            return criteriaBuilder.between(root.get("createdAt"),start,end);
+            if(from == null && to == null) return null;
+            if(from == null) return criteriaBuilder.lessThanOrEqualTo(root.get("createdAt"),to);
+            if(to == null) return criteriaBuilder.greaterThanOrEqualTo(root.get("createdAt"),from);
+            return criteriaBuilder.between(root.get("createdAt"),from,to);
         });
     }
 }

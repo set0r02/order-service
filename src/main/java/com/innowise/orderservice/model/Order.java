@@ -3,6 +3,7 @@ package com.innowise.orderservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class Order extends AuditableEntity{
     private Status status;
 
     @Column(name = "total_price", nullable = false)
-    private double totalPrice;
+    private BigDecimal totalPrice;
 
     @Column(name = "deleted", nullable = false)
     private boolean deleted;

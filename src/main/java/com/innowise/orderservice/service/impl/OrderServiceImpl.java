@@ -12,9 +12,15 @@ import com.innowise.orderservice.model.Status;
 import com.innowise.orderservice.repository.ItemRepository;
 import com.innowise.orderservice.repository.OrderRepository;
 import com.innowise.orderservice.service.OrderService;
+import com.innowise.orderservice.specifications.OrderSpecifications;
 import lombok.RequiredArgsConstructor;
+import org.aspectj.weaver.ast.Or;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,7 +32,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
 
-
+    @Override
     public OrderOutputDto createOrder(OrderInputDto orderInputDto){
         Order order = Order.builder()
                 .userId(orderInputDto.userId())
@@ -60,6 +66,7 @@ public class OrderServiceImpl implements OrderService {
         return orderMapper.toDto(orderRepository.save(order));
     }
 
+    @Override
     public OrderOutputDto getOrderById(Long id){
         Order order = orderRepository.findById(id)
                 .filter(ord -> !ord.isDeleted())
@@ -67,6 +74,41 @@ public class OrderServiceImpl implements OrderService {
                         new NotFoundException("Order not found"));
 
         return orderMapper.toDto(order);
+    }
+
+    @Override
+    public Page<OrderOutputDto> getOrders(Pageable pageable, LocalDateTime from, LocalDateTime to, List<Status> statuses) {
+        Specification<Order> specification = Specification.where(OrderSpecifications.createdBetween(from,to))
+                .and(OrderSpecifications.hasStatuses(statuses));
+        return orderRepository.findAll(specification,pageable)
+                .map(orderMapper::toDto);
+    }
+
+    @Override
+    public List<OrderOutputDto> getOrdersByUserId(Long userId) {
+        return orderRepository.findByUserId(userId).stream()
+                .map(orderMapper::toDto).toList();
+    }
+
+    @Override
+    public OrderOutputDto updateOrderById(Long id, OrderInputDto orderInputDto) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Order not found")
+        );
+        return orderMapper.toDto(orderRepository.save());
+    }
+
+    @Override
+    public OrderOutputDto deleteOrderById(Long id) {
+        return orderMapper.toDto(softDelete(id));
+    }
+
+    private Order softDelete(Long id){
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new NotFoundException("Order not found")
+        );
+        order.setDeleted(true);
+        return orderRepository.save(order);
     }
 
 }

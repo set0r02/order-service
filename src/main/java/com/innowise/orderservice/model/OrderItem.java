@@ -25,7 +25,7 @@ public class OrderItem extends AuditableEntity{
     @JoinColumn(name = "item_id")
     private Item item;
 
-    private int quantity;
+    private Integer quantity;
 
 
     public void setOrder(Order order){

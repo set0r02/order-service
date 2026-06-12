@@ -9,7 +9,7 @@ public record OrderItemInputDto(
         Long itemId,
 
         @Min(value = 1, message = "Quantity must be greater than 0")
-        int quantity
+        Integer quantity
 
 ) {
 

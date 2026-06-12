@@ -3,6 +3,7 @@ package com.innowise.orderservice.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +26,7 @@ public class Item extends AuditableEntity{
     private String name;
 
     @Column(name = "price", nullable = false)
-    private double price;
+    private BigDecimal price;
 
     @Builder.Default
     @OneToMany(mappedBy = "item")
