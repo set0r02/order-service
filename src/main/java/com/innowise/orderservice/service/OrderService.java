@@ -1,6 +1,7 @@
 package com.innowise.orderservice.service;
 
 import com.innowise.orderservice.dto.input.OrderInputDto;
+import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
 import com.innowise.orderservice.model.Status;
 import org.springframework.data.domain.Page;
@@ -19,7 +20,7 @@ public interface OrderService {
 
     List<OrderOutputDto> getOrdersByUserId(Long userId);
 
-    OrderOutputDto updateOrderById(Long id, OrderInputDto orderInputDto);
+    OrderOutputDto updateOrderById(Long id,  OrderUpdateInputDto orderUpdateInputDto);
 
     OrderOutputDto deleteOrderById(Long id);
 

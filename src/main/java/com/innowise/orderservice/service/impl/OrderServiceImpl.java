@@ -2,6 +2,7 @@ package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
+import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
 import com.innowise.orderservice.exception.NotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
@@ -20,6 +21,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +43,7 @@ public class OrderServiceImpl implements OrderService {
                 .build();
 
         List<OrderItem> orderItemsList = new ArrayList<>();
-        double totalPrice = 0;
+        BigDecimal totalPrice = BigDecimal.ZERO;
 
         for(OrderItemInputDto orderItemInputDto : orderInputDto.items()){
             Item item = itemRepository.findById(orderItemInputDto.itemId()).orElseThrow(
@@ -57,7 +59,7 @@ public class OrderServiceImpl implements OrderService {
 
             orderItemsList.add(orderItem);
 
-            totalPrice = item.getPrice() * orderItemInputDto.quantity();
+            totalPrice = item.getPrice().multiply(BigDecimal.valueOf(orderItemInputDto.quantity()));
         }
 
         order.setOrderItems(orderItemsList);
@@ -91,11 +93,12 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderOutputDto updateOrderById(Long id, OrderInputDto orderInputDto) {
+    public OrderOutputDto updateOrderById(Long id, OrderUpdateInputDto orderUpdateInputDto) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new NotFoundException("Order not found")
         );
-        return orderMapper.toDto(orderRepository.save());
+        order.setStatus(orderUpdateInputDto.status());
+        return orderMapper.toDto(orderRepository.save(order));
     }
 
     @Override
