@@ -4,7 +4,8 @@ import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
-import com.innowise.orderservice.exception.NotFoundException;
+import com.innowise.orderservice.exception.ItemNotFoundException;
+import com.innowise.orderservice.exception.OrderNotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.Item;
 import com.innowise.orderservice.model.Order;
@@ -15,7 +16,6 @@ import com.innowise.orderservice.repository.OrderRepository;
 import com.innowise.orderservice.service.OrderService;
 import com.innowise.orderservice.specifications.OrderSpecifications;
 import lombok.RequiredArgsConstructor;
-import org.aspectj.weaver.ast.Or;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -36,6 +36,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderOutputDto createOrder(OrderInputDto orderInputDto){
+
         Order order = Order.builder()
                 .userId(orderInputDto.userId())
                 .status(Status.CREATED)
@@ -47,7 +48,7 @@ public class OrderServiceImpl implements OrderService {
 
         for(OrderItemInputDto orderItemInputDto : orderInputDto.items()){
             Item item = itemRepository.findById(orderItemInputDto.itemId()).orElseThrow(
-                    () -> new NotFoundException("Item not found")
+                    () -> new ItemNotFoundException("Item not found")
             );
 
             OrderItem orderItem = OrderItem.builder()
@@ -73,7 +74,7 @@ public class OrderServiceImpl implements OrderService {
         Order order = orderRepository.findById(id)
                 .filter(ord -> !ord.isDeleted())
                 .orElseThrow(() ->
-                        new NotFoundException("Order not found"));
+                        new OrderNotFoundException("Order not found"));
 
         return orderMapper.toDto(order);
     }
@@ -88,14 +89,15 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public List<OrderOutputDto> getOrdersByUserId(Long userId) {
-        return orderRepository.findByUserId(userId).stream()
+        return orderRepository.findByUserId(userId)
+                .stream()
                 .map(orderMapper::toDto).toList();
     }
 
     @Override
     public OrderOutputDto updateOrderById(Long id, OrderUpdateInputDto orderUpdateInputDto) {
         Order order = orderRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("Order not found")
+                () -> new OrderNotFoundException("Order not found")
         );
         order.setStatus(orderUpdateInputDto.status());
         return orderMapper.toDto(orderRepository.save(order));
@@ -108,7 +110,7 @@ public class OrderServiceImpl implements OrderService {
 
     private Order softDelete(Long id){
         Order order = orderRepository.findById(id).orElseThrow(
-                () -> new NotFoundException("Order not found")
+                () -> new OrderNotFoundException("Order not found")
         );
         order.setDeleted(true);
         return orderRepository.save(order);
