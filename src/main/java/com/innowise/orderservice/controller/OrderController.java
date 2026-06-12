@@ -51,7 +51,7 @@ public class OrderController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<OrderOutputDto> updateOrderById(@PathVariable Long id,
-                                                          @Valid @RequestParam OrderUpdateInputDto orderUpdateInputDto){
+                                                          @Valid @RequestBody OrderUpdateInputDto orderUpdateInputDto){
         return ResponseEntity.status(HttpStatus.OK).body(orderService.updateOrderById(id,orderUpdateInputDto));
     }
 

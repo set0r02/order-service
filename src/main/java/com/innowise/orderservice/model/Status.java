@@ -4,7 +4,7 @@ public enum Status {
 
     CREATED,
     PAID,
-    SENT,
+    SHIPPED,
     COMPLETED,
     CANCELLED
 
