@@ -96,7 +96,7 @@ public class OrderServiceTest {
         order.setDeleted(false);
 
         OrderOutputDto orderOutputDto = mock(OrderOutputDto.class);
-        when(orderOutputDto.userId()).thenReturn(userId);  // ← ДОБАВЬ ЭТУ СТРОКУ
+        when(orderOutputDto.userId()).thenReturn(userId);
 
         UserDto userDto = new UserDto(userId, "test@example.com", "John", "Doe");
 
