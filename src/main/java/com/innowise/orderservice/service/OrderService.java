@@ -3,6 +3,7 @@ package com.innowise.orderservice.service;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
+import com.innowise.orderservice.dto.output.OrderWithUserDto;
 import com.innowise.orderservice.model.Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -12,16 +13,16 @@ import java.util.List;
 
 public interface OrderService {
 
-    OrderOutputDto createOrder(OrderInputDto orderInputDto);
+    OrderWithUserDto createOrder(OrderInputDto orderInputDto);
 
-    OrderOutputDto getOrderById(Long id);
+    OrderWithUserDto getOrderById(Long id);
 
-    Page<OrderOutputDto> getOrders(Pageable pageable, LocalDateTime from, LocalDateTime to, List<Status> statuses);
+    Page<OrderWithUserDto> getOrders(Pageable pageable, LocalDateTime from, LocalDateTime to, List<Status> statuses);
 
-    List<OrderOutputDto> getOrdersByUserId(Long userId);
+    List<OrderWithUserDto> getOrdersByUserId(Long userId);
 
-    OrderOutputDto updateOrderById(Long id,  OrderUpdateInputDto orderUpdateInputDto);
+    OrderWithUserDto updateOrderById(Long id,  OrderUpdateInputDto orderUpdateInputDto);
 
-    OrderOutputDto deleteOrderById(Long id);
+    OrderWithUserDto deleteOrderById(Long id);
 
 }

@@ -1,9 +1,12 @@
 package com.innowise.orderservice.service.impl;
 
+import com.innowise.orderservice.client.UserServiceClient;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
+import com.innowise.orderservice.dto.output.OrderWithUserDto;
+import com.innowise.orderservice.dto.output.UserDto;
 import com.innowise.orderservice.exception.ItemNotFoundException;
 import com.innowise.orderservice.exception.OrderNotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
@@ -20,6 +23,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,15 +31,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
     private final OrderMapper orderMapper;
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
+    private final UserServiceClient userServiceClient;
 
     @Override
-    public OrderOutputDto createOrder(OrderInputDto orderInputDto){
+    public OrderWithUserDto createOrder(OrderInputDto orderInputDto){
 
         Order order = Order.builder()
                 .userId(orderInputDto.userId())
@@ -66,46 +72,80 @@ public class OrderServiceImpl implements OrderService {
         order.setOrderItems(orderItemsList);
         order.setTotalPrice(totalPrice);
 
-        return orderMapper.toDto(orderRepository.save(order));
+        Order savedOrder = orderRepository.save(order);
+
+        OrderOutputDto orderOutputDto = orderMapper.toDto(savedOrder);
+        UserDto userDto = userServiceClient.getUserById(orderInputDto.userId());
+
+        return new OrderWithUserDto(orderOutputDto,userDto);
     }
 
     @Override
-    public OrderOutputDto getOrderById(Long id){
+    @Transactional(readOnly = true)
+    public OrderWithUserDto getOrderById(Long id){
         Order order = orderRepository.findById(id)
                 .filter(ord -> !ord.isDeleted())
                 .orElseThrow(() ->
                         new OrderNotFoundException("Order not found"));
 
-        return orderMapper.toDto(order);
+        OrderOutputDto orderOutputDto = orderMapper.toDto(order);
+        UserDto userDto = userServiceClient.getUserById(orderOutputDto.userId());
+
+        return new OrderWithUserDto(orderOutputDto,userDto);
     }
 
     @Override
-    public Page<OrderOutputDto> getOrders(Pageable pageable, LocalDateTime from, LocalDateTime to, List<Status> statuses) {
-        Specification<Order> specification = Specification.where(OrderSpecifications.createdBetween(from,to))
+    @Transactional(readOnly = true)
+    public Page<OrderWithUserDto> getOrders(Pageable pageable, LocalDateTime from, LocalDateTime to, List<Status> statuses) {
+        Specification<Order> specification = Specification
+                .where(OrderSpecifications.createdBetween(from,to))
                 .and(OrderSpecifications.hasStatuses(statuses));
+
         return orderRepository.findAll(specification,pageable)
-                .map(orderMapper::toDto);
+                .map(order -> {
+                    OrderOutputDto orderOutputDto = orderMapper.toDto(order);
+                    UserDto userDto = userServiceClient.getUserById(order.getUserId());
+                    return new OrderWithUserDto(orderOutputDto,userDto);
+                });
     }
 
     @Override
-    public List<OrderOutputDto> getOrdersByUserId(Long userId) {
+    @Transactional(readOnly = true)
+    public List<OrderWithUserDto> getOrdersByUserId(Long userId) {
+
         return orderRepository.findByUserId(userId)
                 .stream()
-                .map(orderMapper::toDto).toList();
+                .map(order -> {
+                    OrderOutputDto orderOutputDto = orderMapper.toDto(order);
+                    UserDto userDto = userServiceClient.getUserById(userId);
+                    return new OrderWithUserDto(orderOutputDto,userDto);
+                }).toList();
     }
 
     @Override
-    public OrderOutputDto updateOrderById(Long id, OrderUpdateInputDto orderUpdateInputDto) {
+    public OrderWithUserDto updateOrderById(Long id, OrderUpdateInputDto orderUpdateInputDto) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new OrderNotFoundException("Order not found")
         );
         order.setStatus(orderUpdateInputDto.status());
-        return orderMapper.toDto(orderRepository.save(order));
+
+        Order savedOrder = orderRepository.save(order);
+
+        OrderOutputDto orderOutputDto = orderMapper.toDto(order);
+        UserDto userDto = userServiceClient.getUserById(order.getUserId());
+
+        return new OrderWithUserDto(orderOutputDto,userDto);
     }
 
     @Override
-    public OrderOutputDto deleteOrderById(Long id) {
-        return orderMapper.toDto(softDelete(id));
+    public OrderWithUserDto deleteOrderById(Long id) {
+
+        Order order = softDelete(id);
+
+        OrderOutputDto orderOutputDto = orderMapper.toDto(order);
+        UserDto userDto = userServiceClient.getUserById(order.getUserId());
+
+        return new OrderWithUserDto(orderOutputDto,userDto);
     }
 
     private Order softDelete(Long id){

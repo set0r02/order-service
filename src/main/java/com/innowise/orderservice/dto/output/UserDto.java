@@ -2,7 +2,7 @@ package com.innowise.orderservice.dto.output;
 
 import java.io.Serializable;
 
-public record UserOutputDto(
+public record UserDto(
 
         Long id,
 

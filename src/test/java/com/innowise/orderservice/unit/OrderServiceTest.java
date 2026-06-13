@@ -1,10 +1,13 @@
 package com.innowise.orderservice.unit;
 
 
+import com.innowise.orderservice.client.UserServiceClient;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
+import com.innowise.orderservice.dto.output.OrderWithUserDto;
+import com.innowise.orderservice.dto.output.UserDto;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.Item;
 import com.innowise.orderservice.model.Order;
@@ -43,6 +46,9 @@ public class OrderServiceTest {
     @Mock
     private OrderMapper orderMapper;
 
+    @Mock
+    private UserServiceClient userServiceClient;
+
     @InjectMocks
     private OrderServiceImpl orderService;
 
@@ -61,37 +67,49 @@ public class OrderServiceTest {
 
         Order savedOrder = new Order();
         savedOrder.setId(1L);
+        savedOrder.setUserId(10L);
 
         OrderOutputDto outputDto = mock(OrderOutputDto.class);
+        UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
 
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(orderMapper.toDto(savedOrder)).thenReturn(outputDto);
+        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
 
-        OrderOutputDto result = orderService.createOrder(input);
+        OrderWithUserDto result = orderService.createOrder(input);
 
         assertNotNull(result);
         verify(itemRepository, times(1)).findById(1L);
         verify(orderRepository, times(1)).save(any(Order.class));
+        verify(userServiceClient, times(1)).getUserById(10L);
     }
 
     @Test
     void getOrderByIdTest() {
         Long id = 1L;
+        Long userId = 10L;
 
         Order order = new Order();
         order.setId(id);
+        order.setUserId(userId);
         order.setDeleted(false);
 
-        OrderOutputDto dto = mock(OrderOutputDto.class);
+        OrderOutputDto orderOutputDto = mock(OrderOutputDto.class);
+        when(orderOutputDto.userId()).thenReturn(userId);  // ← ДОБАВЬ ЭТУ СТРОКУ
+
+        UserDto userDto = new UserDto(userId, "test@example.com", "John", "Doe");
 
         when(orderRepository.findById(id)).thenReturn(Optional.of(order));
-        when(orderMapper.toDto(order)).thenReturn(dto);
+        when(orderMapper.toDto(order)).thenReturn(orderOutputDto);
+        when(userServiceClient.getUserById(userId)).thenReturn(userDto);
 
-        OrderOutputDto result = orderService.getOrderById(id);
+        OrderWithUserDto result = orderService.getOrderById(id);
 
         assertNotNull(result);
         verify(orderRepository).findById(id);
+        verify(orderMapper).toDto(order);
+        verify(userServiceClient).getUserById(userId);
     }
 
     @Test
@@ -99,21 +117,24 @@ public class OrderServiceTest {
         Pageable pageable = Pageable.ofSize(10);
 
         Order order = new Order();
+        order.setUserId(10L);
+
         Page<Order> page = new PageImpl<>(List.of(order));
 
         OrderOutputDto dto = mock(OrderOutputDto.class);
+        UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
 
         when(orderRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(page);
-
         when(orderMapper.toDto(order)).thenReturn(dto);
+        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
 
-        Page<OrderOutputDto> result =
-                orderService.getOrders(pageable, LocalDateTime.now().minusDays(1), LocalDateTime.now(), List.of(Status.CREATED));
+        Page<OrderWithUserDto> result = orderService.getOrders(pageable, LocalDateTime.now().minusDays(1), LocalDateTime.now(), List.of(Status.CREATED));
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         verify(orderRepository).findAll(any(Specification.class), eq(pageable));
+        verify(userServiceClient).getUserById(10L);
     }
 
     @Test
@@ -122,14 +143,17 @@ public class OrderServiceTest {
 
         Order order = new Order();
         OrderOutputDto dto = mock(OrderOutputDto.class);
+        UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
 
         when(orderRepository.findByUserId(userId)).thenReturn(List.of(order));
         when(orderMapper.toDto(order)).thenReturn(dto);
+        when(userServiceClient.getUserById(userId)).thenReturn(userDto);
 
-        List<OrderOutputDto> result = orderService.getOrdersByUserId(userId);
+        List<OrderWithUserDto> result = orderService.getOrdersByUserId(userId);
 
         assertEquals(1, result.size());
         verify(orderRepository).findByUserId(userId);
+        verify(userServiceClient).getUserById(userId);
     }
 
     @Test
@@ -138,21 +162,24 @@ public class OrderServiceTest {
 
         Order order = new Order();
         order.setId(id);
+        order.setUserId(10L);
 
         OrderUpdateInputDto updateDto = mock(OrderUpdateInputDto.class);
 
         OrderOutputDto dto = mock(OrderOutputDto.class);
+        UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
 
         when(orderRepository.findById(id)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
         when(orderMapper.toDto(order)).thenReturn(dto);
-
+        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
         when(updateDto.status()).thenReturn(Status.SHIPPED);
 
-        OrderOutputDto result = orderService.updateOrderById(id, updateDto);
+        OrderWithUserDto result = orderService.updateOrderById(id, updateDto);
 
         assertNotNull(result);
         assertEquals(Status.SHIPPED, order.getStatus());
+        verify(userServiceClient).getUserById(10L);
     }
 
     @Test
@@ -161,18 +188,22 @@ public class OrderServiceTest {
 
         Order order = new Order();
         order.setId(id);
+        order.setUserId(10L);
         order.setDeleted(false);
 
         OrderOutputDto dto = mock(OrderOutputDto.class);
+        UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
 
         when(orderRepository.findById(id)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
         when(orderMapper.toDto(order)).thenReturn(dto);
+        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
 
-        OrderOutputDto result = orderService.deleteOrderById(id);
+        OrderWithUserDto result = orderService.deleteOrderById(id);
 
         assertNotNull(result);
         assertTrue(order.isDeleted());
         verify(orderRepository).save(order);
+        verify(userServiceClient).getUserById(10L);
     }
 }

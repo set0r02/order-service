@@ -19,5 +19,10 @@ spring:
       hibernate:
         format_sql: false
 
-  logging:
-    level: INFO
+  service:
+    user-service:
+      url: http://localhost:8081
+
+logging:
+  level:
+    root: INFO
