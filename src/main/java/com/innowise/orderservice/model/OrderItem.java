@@ -27,14 +27,4 @@ public class OrderItem extends AuditableEntity{
 
     private Integer quantity;
 
-
-    public void setOrder(Order order){
-        this.order = order;
-        this.order.getOrderItems().add(this);
-    }
-
-    public void setItem(Item item){
-        this.item = item;
-        this.item.getOrderItems().add(this);
-    }
 }

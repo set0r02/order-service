@@ -39,4 +39,9 @@ public class Order extends AuditableEntity{
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    public void addOrderItem(OrderItem item){
+        orderItems.add(item);
+        item.setOrder(this);
+    }
+
 }
