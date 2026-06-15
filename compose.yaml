@@ -23,7 +23,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - DB_USERNAME=${DB_USERNAME:-postgres}
       - DB_PASSWORD=${DB_PASSWORD:-postgres}
-      - DB_URL=${ORDER_DB_URL:-jdbc:postgresql://order-db:5432/order_db}
+      - ORDER_DB_URL=${ORDER_DB_URL:-jdbc:postgresql://order-db:5432/order_db}
     depends_on:
       order-db:
         condition: service_healthy
