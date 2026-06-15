@@ -66,7 +66,7 @@ public class OrderServiceImpl implements OrderService {
 
             orderItemsList.add(orderItem);
 
-            totalPrice = item.getPrice().multiply(BigDecimal.valueOf(orderItemInputDto.quantity()));
+            totalPrice = totalPrice.add(item.getPrice().multiply(BigDecimal.valueOf(orderItemInputDto.quantity())));
         }
 
         order.setOrderItems(orderItemsList);
