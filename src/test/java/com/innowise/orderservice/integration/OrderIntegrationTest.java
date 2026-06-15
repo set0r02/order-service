@@ -45,7 +45,6 @@
                     .webAppContextSetup(webApplicationContext)
                     .build();
 
-            // Мокаем ответ от User Service для всех userId
             UserDto mockUser = new UserDto(1L, "test1@example.com", "John", "Doe");
             UserDto mockUser10 = new UserDto(10L, "test10@example.com", "Jane", "Smith");
 
