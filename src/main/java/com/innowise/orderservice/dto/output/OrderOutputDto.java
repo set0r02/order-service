@@ -16,8 +16,6 @@ public record OrderOutputDto(
 
         BigDecimal totalPrice,
 
-        boolean deleted,
-
         List<OrderItemOutputDto> items,
 
         LocalDateTime createdAt,
