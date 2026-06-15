@@ -50,6 +50,7 @@ databaseChangeLog:
 
   - changeSet:
       id: 2
+      author: Ilya
       changes:
         - createTable:
             tableName: items
@@ -87,6 +88,7 @@ databaseChangeLog:
                   name: name
   - changeSet:
       id: 3
+      author: Ilya
       changes:
         - createTable:
             tableName: order_items
