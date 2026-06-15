@@ -2,6 +2,7 @@ package com.innowise.orderservice.unit;
 
 
 import com.innowise.orderservice.client.UserServiceClient;
+import com.innowise.orderservice.client.service.UserServiceGateway;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
@@ -47,7 +48,7 @@ public class OrderServiceTest {
     private OrderMapper orderMapper;
 
     @Mock
-    private UserServiceClient userServiceClient;
+    private UserServiceGateway userServiceGateway;
 
     @InjectMocks
     private OrderServiceImpl orderService;
@@ -75,14 +76,14 @@ public class OrderServiceTest {
         when(itemRepository.findById(1L)).thenReturn(Optional.of(item));
         when(orderRepository.save(any(Order.class))).thenReturn(savedOrder);
         when(orderMapper.toDto(savedOrder)).thenReturn(outputDto);
-        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
+        when(userServiceGateway.getUser(10L)).thenReturn(userDto);
 
         OrderWithUserDto result = orderService.createOrder(input);
 
         assertNotNull(result);
         verify(itemRepository, times(1)).findById(1L);
         verify(orderRepository, times(1)).save(any(Order.class));
-        verify(userServiceClient, times(1)).getUserById(10L);
+        verify(userServiceGateway, times(1)).getUser(10L);
     }
 
     @Test
@@ -96,20 +97,22 @@ public class OrderServiceTest {
         order.setDeleted(false);
 
         OrderOutputDto orderOutputDto = mock(OrderOutputDto.class);
-        when(orderOutputDto.userId()).thenReturn(userId);
 
         UserDto userDto = new UserDto(userId, "test@example.com", "John", "Doe");
 
-        when(orderRepository.findById(id)).thenReturn(Optional.of(order));
+        when(orderRepository.findByIdAndDeletedFalse(id))
+                .thenReturn(Optional.of(order));
+
         when(orderMapper.toDto(order)).thenReturn(orderOutputDto);
-        when(userServiceClient.getUserById(userId)).thenReturn(userDto);
+        when(userServiceGateway.getUser(userId)).thenReturn(userDto);
 
         OrderWithUserDto result = orderService.getOrderById(id);
 
         assertNotNull(result);
-        verify(orderRepository).findById(id);
+
+        verify(orderRepository).findByIdAndDeletedFalse(id);
         verify(orderMapper).toDto(order);
-        verify(userServiceClient).getUserById(userId);
+        verify(userServiceGateway).getUser(userId);
     }
 
     @Test
@@ -127,14 +130,14 @@ public class OrderServiceTest {
         when(orderRepository.findAll(any(Specification.class), eq(pageable)))
                 .thenReturn(page);
         when(orderMapper.toDto(order)).thenReturn(dto);
-        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
+        when(userServiceGateway.getUser(10L)).thenReturn(userDto);
 
         Page<OrderWithUserDto> result = orderService.getOrders(pageable, LocalDateTime.now().minusDays(1), LocalDateTime.now(), List.of(Status.CREATED));
 
         assertNotNull(result);
         assertEquals(1, result.getContent().size());
         verify(orderRepository).findAll(any(Specification.class), eq(pageable));
-        verify(userServiceClient).getUserById(10L);
+        verify(userServiceGateway).getUser(10L);
     }
 
     @Test
@@ -147,13 +150,13 @@ public class OrderServiceTest {
 
         when(orderRepository.findByUserIdAndDeletedFalse(userId)).thenReturn(List.of(order));
         when(orderMapper.toDto(order)).thenReturn(dto);
-        when(userServiceClient.getUserById(userId)).thenReturn(userDto);
+        when(userServiceGateway.getUser(userId)).thenReturn(userDto);
 
         List<OrderWithUserDto> result = orderService.getOrdersByUserId(userId);
 
         assertEquals(1, result.size());
         verify(orderRepository).findByUserIdAndDeletedFalse(userId);
-        verify(userServiceClient).getUserById(userId);
+        verify(userServiceGateway).getUser(userId);
     }
 
     @Test
@@ -172,14 +175,14 @@ public class OrderServiceTest {
         when(orderRepository.findById(id)).thenReturn(Optional.of(order));
         when(orderRepository.save(order)).thenReturn(order);
         when(orderMapper.toDto(order)).thenReturn(dto);
-        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
+        when(userServiceGateway.getUser(10L)).thenReturn(userDto);
         when(updateDto.status()).thenReturn(Status.SHIPPED);
 
         OrderWithUserDto result = orderService.updateOrderById(id, updateDto);
 
         assertNotNull(result);
         assertEquals(Status.SHIPPED, order.getStatus());
-        verify(userServiceClient).getUserById(10L);
+        verify(userServiceGateway).getUser(10L);
     }
 
     @Test
@@ -191,19 +194,14 @@ public class OrderServiceTest {
         order.setUserId(10L);
         order.setDeleted(false);
 
-        OrderOutputDto dto = mock(OrderOutputDto.class);
-        UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
-
         when(orderRepository.findById(id)).thenReturn(Optional.of(order));
         when(orderRepository.save(any(Order.class))).thenReturn(order);
-        when(orderMapper.toDto(order)).thenReturn(dto);
-        when(userServiceClient.getUserById(10L)).thenReturn(userDto);
 
-        OrderWithUserDto result = orderService.deleteOrderById(id);
+        orderService.deleteOrderById(id);
 
-        assertNotNull(result);
         assertTrue(order.isDeleted());
+
+        verify(orderRepository).findById(id);
         verify(orderRepository).save(order);
-        verify(userServiceClient).getUserById(10L);
     }
 }

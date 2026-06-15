@@ -27,3 +27,11 @@ app:
 logging:
   level:
     root: INFO
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s

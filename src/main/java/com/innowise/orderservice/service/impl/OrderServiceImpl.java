@@ -1,6 +1,7 @@
 package com.innowise.orderservice.service.impl;
 
 import com.innowise.orderservice.client.UserServiceClient;
+import com.innowise.orderservice.client.service.UserServiceGateway;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
@@ -39,6 +40,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
     private final UserServiceClient userServiceClient;
+    private final UserServiceGateway userServiceGateway;
 
     @Override
     public OrderWithUserDto createOrder(OrderInputDto orderInputDto){
@@ -74,10 +76,7 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        OrderOutputDto orderOutputDto = orderMapper.toDto(savedOrder);
-        UserDto userDto = userServiceClient.getUserById(orderInputDto.userId());
-
-        return new OrderWithUserDto(orderOutputDto,userDto);
+        return buildOrderWithUserDto(savedOrder);
     }
 
     @Override
@@ -87,10 +86,7 @@ public class OrderServiceImpl implements OrderService {
                 .orElseThrow(() ->
                         new OrderNotFoundException("Order not found"));
 
-        OrderOutputDto orderOutputDto = orderMapper.toDto(order);
-        UserDto userDto = userServiceClient.getUserById(orderOutputDto.userId());
-
-        return new OrderWithUserDto(orderOutputDto,userDto);
+        return buildOrderWithUserDto(order);
     }
 
     @Override
@@ -102,22 +98,21 @@ public class OrderServiceImpl implements OrderService {
                 .and(OrderSpecifications.hasStatuses(statuses));
 
         return orderRepository.findAll(specification,pageable)
-                .map(order -> {
-                    OrderOutputDto orderOutputDto = orderMapper.toDto(order);
-                    UserDto userDto = userServiceClient.getUserById(order.getUserId());
-                    return new OrderWithUserDto(orderOutputDto,userDto);
-                });
+                .map(this::buildOrderWithUserDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<OrderWithUserDto> getOrdersByUserId(Long userId) {
 
-        UserDto userDto = userServiceClient.getUserById(userId);
+        UserDto userDto = userServiceGateway.getUser(userId);
 
         return orderRepository.findByUserIdAndDeletedFalse(userId)
                 .stream()
-                .map(order -> new OrderWithUserDto(orderMapper.toDto(order),userDto))
+                .map(order -> new OrderWithUserDto(
+                        orderMapper.toDto(order),
+                        userDto
+                ))
                 .toList();
     }
 
@@ -129,11 +124,7 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(orderUpdateInputDto.status());
 
         Order savedOrder = orderRepository.save(order);
-
-        OrderOutputDto orderOutputDto = orderMapper.toDto(savedOrder);
-        UserDto userDto = userServiceClient.getUserById(order.getUserId());
-
-        return new OrderWithUserDto(orderOutputDto,userDto);
+        return buildOrderWithUserDto(savedOrder);
     }
 
     @Override
@@ -149,4 +140,11 @@ public class OrderServiceImpl implements OrderService {
         orderRepository.save(order);
     }
 
+
+    private OrderWithUserDto buildOrderWithUserDto(Order order){
+        return new OrderWithUserDto(
+                orderMapper.toDto(order),
+                userServiceGateway.getUser(order.getUserId())
+        );
+    }
 }
