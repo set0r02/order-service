@@ -2,11 +2,13 @@ package com.innowise.orderservice.specifications;
 
 import com.innowise.orderservice.model.Order;
 import com.innowise.orderservice.model.Status;
+import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@UtilityClass
 public class OrderSpecifications {
     public static Specification<Order> hasStatuses(List<Status> statusList) {
         return (root, query, criteriaBuilder) ->
