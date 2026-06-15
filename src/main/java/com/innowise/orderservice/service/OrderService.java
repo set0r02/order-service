@@ -22,6 +22,6 @@ public interface OrderService {
 
     OrderWithUserDto updateOrderById(Long id,  OrderUpdateInputDto orderUpdateInputDto);
 
-    OrderWithUserDto deleteOrderById(Long id);
+    void deleteOrderById(Long id);
 
 }

@@ -83,8 +83,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     @Transactional(readOnly = true)
     public OrderWithUserDto getOrderById(Long id){
-        Order order = orderRepository.findById(id)
-                .filter(ord -> !ord.isDeleted())
+        Order order = orderRepository.findByIdAndDeletedFalse(id)
                 .orElseThrow(() ->
                         new OrderNotFoundException("Order not found"));
 
@@ -98,7 +97,8 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public Page<OrderWithUserDto> getOrders(Pageable pageable, LocalDateTime from, LocalDateTime to, List<Status> statuses) {
         Specification<Order> specification = Specification
-                .where(OrderSpecifications.createdBetween(from,to))
+                .where(OrderSpecifications.notDeleted())
+                .and(OrderSpecifications.createdBetween(from,to))
                 .and(OrderSpecifications.hasStatuses(statuses));
 
         return orderRepository.findAll(specification,pageable)
@@ -113,13 +113,12 @@ public class OrderServiceImpl implements OrderService {
     @Transactional(readOnly = true)
     public List<OrderWithUserDto> getOrdersByUserId(Long userId) {
 
-        return orderRepository.findByUserId(userId)
+        UserDto userDto = userServiceClient.getUserById(userId);
+
+        return orderRepository.findByUserIdAndDeletedFalse(userId)
                 .stream()
-                .map(order -> {
-                    OrderOutputDto orderOutputDto = orderMapper.toDto(order);
-                    UserDto userDto = userServiceClient.getUserById(userId);
-                    return new OrderWithUserDto(orderOutputDto,userDto);
-                }).toList();
+                .map(order -> new OrderWithUserDto(orderMapper.toDto(order),userDto))
+                .toList();
     }
 
     @Override
@@ -131,29 +130,23 @@ public class OrderServiceImpl implements OrderService {
 
         Order savedOrder = orderRepository.save(order);
 
-        OrderOutputDto orderOutputDto = orderMapper.toDto(order);
+        OrderOutputDto orderOutputDto = orderMapper.toDto(savedOrder);
         UserDto userDto = userServiceClient.getUserById(order.getUserId());
 
         return new OrderWithUserDto(orderOutputDto,userDto);
     }
 
     @Override
-    public OrderWithUserDto deleteOrderById(Long id) {
-
-        Order order = softDelete(id);
-
-        OrderOutputDto orderOutputDto = orderMapper.toDto(order);
-        UserDto userDto = userServiceClient.getUserById(order.getUserId());
-
-        return new OrderWithUserDto(orderOutputDto,userDto);
+    public void deleteOrderById(Long id) {
+        softDelete(id);
     }
 
-    private Order softDelete(Long id){
+    private void softDelete(Long id){
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new OrderNotFoundException("Order not found")
         );
         order.setDeleted(true);
-        return orderRepository.save(order);
+        orderRepository.save(order);
     }
 
 }

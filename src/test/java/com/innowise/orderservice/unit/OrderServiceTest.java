@@ -145,14 +145,14 @@ public class OrderServiceTest {
         OrderOutputDto dto = mock(OrderOutputDto.class);
         UserDto userDto = new UserDto(1L, "test@example.com", "John", "Doe");
 
-        when(orderRepository.findByUserId(userId)).thenReturn(List.of(order));
+        when(orderRepository.findByUserIdAndDeletedFalse(userId)).thenReturn(List.of(order));
         when(orderMapper.toDto(order)).thenReturn(dto);
         when(userServiceClient.getUserById(userId)).thenReturn(userDto);
 
         List<OrderWithUserDto> result = orderService.getOrdersByUserId(userId);
 
         assertEquals(1, result.size());
-        verify(orderRepository).findByUserId(userId);
+        verify(orderRepository).findByUserIdAndDeletedFalse(userId);
         verify(userServiceClient).getUserById(userId);
     }
 

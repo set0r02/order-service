@@ -20,5 +20,11 @@ public class OrderSpecifications {
             return criteriaBuilder.between(root.get("createdAt"),from,to);
         });
     }
+
+    public static Specification<Order> notDeleted(){
+        return ((root, query, criteriaBuilder) ->
+                criteriaBuilder.isFalse(root.get("deleted"))
+        );
+    }
 }
 
