@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: orderservice
+  datasource:
+    url: ${ORDER_DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+
+  liquibase:
+    change-log-path: classpath:changelog/db.changelog-master.yaml
+    enabled: true
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show_sql: false
+    properties:
+      hibernate:
+        format_sql: false
+
+app:
+  service:
+    user-service:
+      url: ${USER_SERVICE_URL:http://localhost:8081}
+
+logging:
+  level:
+    root: INFO
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      userService:
+        sliding-window-size: 10
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 10s
