@@ -3,7 +3,7 @@ package com.innowise.orderservice.controller;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderWithUserDto;
-import com.innowise.orderservice.model.Status;
+import com.innowise.orderservice.model.enums.Status;
 import com.innowise.orderservice.service.OrderService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;

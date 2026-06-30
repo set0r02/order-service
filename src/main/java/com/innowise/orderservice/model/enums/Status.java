@@ -1,4 +1,4 @@
-package com.innowise.orderservice.model;
+package com.innowise.orderservice.model.enums;
 
 public enum Status {
 

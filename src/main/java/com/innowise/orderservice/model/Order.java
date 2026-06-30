@@ -1,5 +1,6 @@
 package com.innowise.orderservice.model;
 
+import com.innowise.orderservice.model.enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 

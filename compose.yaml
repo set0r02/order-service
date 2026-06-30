@@ -27,3 +27,7 @@ services:
     depends_on:
       order-db:
         condition: service_healthy
+
+networks:
+  backend:
+    driver: bridge

@@ -1,6 +1,6 @@
 package com.innowise.orderservice.dto.output;
 
-import com.innowise.orderservice.model.Status;
+import com.innowise.orderservice.model.enums.Status;
 
 import java.io.Serializable;
 import java.math.BigDecimal;

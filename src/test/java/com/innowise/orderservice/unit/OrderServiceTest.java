@@ -1,7 +1,6 @@
 package com.innowise.orderservice.unit;
 
 
-import com.innowise.orderservice.client.UserServiceClient;
 import com.innowise.orderservice.client.service.UserServiceGateway;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
@@ -12,7 +11,7 @@ import com.innowise.orderservice.dto.output.UserDto;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.Item;
 import com.innowise.orderservice.model.Order;
-import com.innowise.orderservice.model.Status;
+import com.innowise.orderservice.model.enums.Status;
 import com.innowise.orderservice.repository.ItemRepository;
 import com.innowise.orderservice.repository.OrderRepository;
 import com.innowise.orderservice.service.impl.OrderServiceImpl;
