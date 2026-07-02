@@ -26,9 +26,10 @@
 
     import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-    @SpringBootTest
+
     @Testcontainers
     @ActiveProfiles("test")
+    @SpringBootTest()
     public class OrderIntegrationTest {
 
         @Autowired

@@ -8,9 +8,11 @@ import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
 import com.innowise.orderservice.dto.output.OrderOutputDto;
 import com.innowise.orderservice.dto.output.OrderWithUserDto;
 import com.innowise.orderservice.dto.output.UserDto;
+import com.innowise.orderservice.exception.OrderNotFoundException;
 import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.Item;
 import com.innowise.orderservice.model.Order;
+import com.innowise.orderservice.model.enums.PaymentStatus;
 import com.innowise.orderservice.model.enums.Status;
 import com.innowise.orderservice.repository.ItemRepository;
 import com.innowise.orderservice.repository.OrderRepository;
@@ -202,5 +204,61 @@ public class OrderServiceTest {
 
         verify(orderRepository).findById(id);
         verify(orderRepository).save(order);
+    }
+
+    @Test
+    void handlePayment_success_shouldMarkOrderAsPaid() {
+        Long orderId = 1L;
+
+        Order order = new Order();
+        order.setId(orderId);
+        order.setStatus(Status.CREATED);
+
+        when(orderRepository.findByIdAndDeletedFalse(orderId))
+                .thenReturn(Optional.of(order));
+
+        orderService.handlePayment(orderId, PaymentStatus.SUCCESS);
+
+        assertEquals(Status.PAID, order.getStatus());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    void handlePayment_failed_shouldMarkOrderAsCancelled() {
+        Long orderId = 2L;
+
+        Order order = new Order();
+        order.setId(orderId);
+        order.setStatus(Status.CREATED);
+
+        when(orderRepository.findByIdAndDeletedFalse(orderId))
+                .thenReturn(Optional.of(order));
+
+        orderService.handlePayment(orderId, PaymentStatus.FAILED);
+
+        assertEquals(Status.CANCELLED, order.getStatus());
+        verify(orderRepository).save(order);
+    }
+
+    @Test
+    void handlePayment_pending_shouldDoNothing() {
+        Long orderId = 3L;
+
+        orderService.handlePayment(orderId, PaymentStatus.PENDING);
+
+        verifyNoInteractions(orderRepository);
+    }
+
+    @Test
+    void handlePayment_orderNotFound_shouldThrowException() {
+        Long orderId = 999L;
+
+        when(orderRepository.findByIdAndDeletedFalse(orderId))
+                .thenReturn(Optional.empty());
+
+        assertThrows(OrderNotFoundException.class,
+                () -> orderService.handlePayment(orderId, PaymentStatus.SUCCESS));
+
+        verify(orderRepository, never()).save(any());
     }
 }
