@@ -5,7 +5,6 @@ import com.innowise.orderservice.client.service.UserServiceGateway;
 import com.innowise.orderservice.dto.input.OrderInputDto;
 import com.innowise.orderservice.dto.input.OrderItemInputDto;
 import com.innowise.orderservice.dto.input.OrderUpdateInputDto;
-import com.innowise.orderservice.dto.output.OrderOutputDto;
 import com.innowise.orderservice.dto.output.OrderWithUserDto;
 import com.innowise.orderservice.dto.output.UserDto;
 import com.innowise.orderservice.exception.ItemNotFoundException;
@@ -14,7 +13,8 @@ import com.innowise.orderservice.mapper.OrderMapper;
 import com.innowise.orderservice.model.Item;
 import com.innowise.orderservice.model.Order;
 import com.innowise.orderservice.model.OrderItem;
-import com.innowise.orderservice.model.Status;
+import com.innowise.orderservice.model.enums.PaymentStatus;
+import com.innowise.orderservice.model.enums.Status;
 import com.innowise.orderservice.repository.ItemRepository;
 import com.innowise.orderservice.repository.OrderRepository;
 import com.innowise.orderservice.service.OrderService;
@@ -130,6 +130,31 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public void deleteOrderById(Long id) {
         softDelete(id);
+    }
+
+    @Override
+    public void handlePayment(Long id, PaymentStatus paymentStatus){
+
+        if (paymentStatus == PaymentStatus.PENDING) {
+            return;
+        }
+
+        Order order = orderRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new OrderNotFoundException("Order not found with id: " + id));
+
+        Status newStatus = switch (paymentStatus) {
+            case SUCCESS -> Status.PAID;
+            case FAILED -> Status.CANCELLED;
+            default -> throw new IllegalStateException("Unsupported payment status: " + paymentStatus);
+        };
+
+        if (order.getStatus() == newStatus) {
+            return;
+        }
+
+        order.setStatus(newStatus);
+        orderRepository.save(order);
+        
     }
 
     private void softDelete(Long id){

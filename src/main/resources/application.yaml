@@ -1,6 +1,7 @@
 spring:
   application:
     name: orderservice
+
   datasource:
     url: ${ORDER_DB_URL}
     username: ${DB_USERNAME}
@@ -19,10 +20,24 @@ spring:
       hibernate:
         format_sql: false
 
+  kafka:
+    bootstrap-servers: ${BOOTSTRAP_SERVICES:localhost:9092}
+    consumer:
+      group-id: order-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: com.innowise.orderservice.dto.event
+
 app:
   service:
     user-service:
       url: ${USER_SERVICE_URL:http://localhost:8081}
+
+  kafka:
+    topics:
+      payment-events: payment-events
 
 logging:
   level:

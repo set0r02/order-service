@@ -1,7 +1,7 @@
 package com.innowise.orderservice.specifications;
 
 import com.innowise.orderservice.model.Order;
-import com.innowise.orderservice.model.Status;
+import com.innowise.orderservice.model.enums.Status;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.jpa.domain.Specification;
 
